@@ -73,13 +73,13 @@ class StockAudioSynth:
         """设置播放速度 (0.1-5.0)"""
         self.playback_speed = float(speed)
 
-    def _calculate_current_freq(self):
-        """根据当前价格计算频率"""
-        if not self.price_data or self.current_index >= len(self.price_data):
+    def _calculate_current_freq(self, idx):
+        """根据指定索引的价格计算频率"""
+        if not self.price_data or idx >= len(self.price_data):
             return BASE_FREQ
 
         # 获取当前价格
-        _, current_price = self.price_data[self.current_index]
+        _, current_price = self.price_data[idx]
 
         # 计算价格变化百分比 (相对于第一个价格)
         if len(self.price_data) > 1:
@@ -101,12 +101,16 @@ class StockAudioSynth:
             advance = elapsed * self.playback_speed * 2  # 调整这个系数可以改变数据点更新速度
             self.current_index = min(len(self.price_data) - 1, self.current_index + advance)
 
+            # 确保索引是整数
+            current_idx = int(self.current_index)
+
             # 如果到达数据末尾，停止或循环
-            if self.current_index >= len(self.price_data) - 1:
-                self.current_index = len(self.price_data) - 1
+            if current_idx >= len(self.price_data) - 1:
+                current_idx = len(self.price_data) - 1
+                self.current_index = current_idx  # 重置为整数
 
             # 计算当前频率
-            self.current_freq = self._calculate_current_freq()
+            self.current_freq = self._calculate_current_freq(current_idx)
 
             # 生成正弦波
             t = np.arange(CHUNK) / SAMPLE_RATE
@@ -266,8 +270,9 @@ class StockAudioApp:
 
     def update_data_display(self):
         """更新数据显示"""
-        if self.synth.price_data and self.synth.current_index < len(self.synth.price_data):
-            time_str, price = self.synth.price_data[int(self.synth.current_index)]
+        if self.synth.price_data and int(self.synth.current_index) < len(self.synth.price_data):
+            current_idx = int(self.synth.current_index)
+            time_str, price = self.synth.price_data[current_idx]
             self.data_info.config(text=f"时间: {time_str}  价格: {price:.2f}")
 
             # 计算价格变化
