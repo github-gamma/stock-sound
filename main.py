@@ -46,6 +46,7 @@ class StockAudioSynth:
             frames_per_buffer=CHUNK
         )
 
+
     def load_stock_data(self, stock_code, date_str):
         """从AKShare加载股票分时数据"""
         try:
