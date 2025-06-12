@@ -10,8 +10,10 @@ from datetime import datetime, timedelta
 # 音频参数
 SAMPLE_RATE = 44100  # 采样率 (Hz)
 CHUNK = 1024  # 每次处理的音频块大小
-AMPLITUDE = 0.3  # 音量 (0.0 到 1.0)
-BASE_FREQ = 220.0  # 基础频率 (Hz)
+AMPLITUDE = 0.2  # 音量 (0.0 到 1.0)
+# BASE_FREQ = 220.0  # 基础频率 (Hz)
+BASE_FREQ = 220  # 基础频率 (Hz)
+
 
 
 class StockAudioSynth:
@@ -77,7 +79,8 @@ class StockAudioSynth:
         """根据指定索引的价格计算频率"""
         if not self.price_data or idx >= len(self.price_data):
             return BASE_FREQ
-
+        if idx == 240:
+            return 50
         # 获取当前价格
         _, current_price = self.price_data[idx]
 
@@ -85,7 +88,7 @@ class StockAudioSynth:
         if len(self.price_data) > 1:
             first_price = self.price_data[0][1]
             price_change = (current_price - first_price) / first_price  # 涨跌幅百分比
-            freq = BASE_FREQ * (1.0 + price_change * 2)  # 涨跌影响频率
+            freq = BASE_FREQ * (1.0 + price_change * 10)  # 涨跌影响频率
             return max(50.0, min(2000.0, freq))  # 限制在50-2000Hz范围内
         return BASE_FREQ
 
